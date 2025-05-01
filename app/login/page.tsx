@@ -31,8 +31,8 @@ export default function ProfilePage({
                     <Image
                         src={userData.avatar_url}
                         alt={userData.login}
-                        width={100}
-                        height={100}
+                        width={60}
+                        height={60}
                         className="rounded-full"
                     />
                 </div>

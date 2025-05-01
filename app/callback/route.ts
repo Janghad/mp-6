@@ -25,24 +25,23 @@ interface AccessTokenResponse {
 }
 
 export async function GET(request: NextRequest) {
-    const authCode = request.nextUrl.searchParams.get("code");
+    const code = request.nextUrl.searchParams.get("code");
 
-    if (!authCode) { //if there is an error getting user info send back to homepage
+    if (!code) { 
         return NextResponse.redirect(new URL("/", request.url));
     }
 
     try {
-        const tokenResponse = await fetch ("https://github.com/login/oauth/access_token", {
+        const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
             method: "POST",
             headers: {
-                "Accept": "application/json", // Accepts header to get JSON response (idea taken from CS391 S1)
+                "Accept": "application/json",
                 "Content-Type": "application/json"
             },
-
             body: JSON.stringify({
                 client_id: process.env.GITHUB_CLIENT_ID,
                 client_secret: process.env.GITHUB_CLIENT_SECRET,
-                authCode,
+                code: code,
                 redirect_uri: process.env.REDIRECT_URI
             })
         });
@@ -56,32 +55,40 @@ export async function GET(request: NextRequest) {
         const userResponse = await fetch("https://api.github.com/user", {
             headers: {
                 "Authorization": `Bearer ${tokenData.access_token}`,
-                "User-Agent": "MP-6 GitHub OAUTH" 
+                "User-Agent": "MP-6 GitHub OAUTH",
+                "Accept": "application/json"
             }
         });
 
         const userData: GitHubInfo = await userResponse.json();
 
-        const response = NextResponse.redirect(new URL("/", request.url));
+        let primaryEmail: string | null = null;
+        if (!primaryEmail) {
+            const emailsResponse = await fetch("https://api.github.com/user/emails", {
+                headers: {
+                    "Authorization": `Bearer ${tokenData.access_token}`,
+                    "User-Agent": "MP-6 GitHub OAUTH"
+                }
+            });
+            
+            const emailsData: GitHubEmail[] = await emailsResponse.json();
+            const primaryEmailData = emailsData.find(email => email.primary && email.verified);
+            primaryEmail = primaryEmailData ? primaryEmailData.email : null;
+        }
 
-        const userForCookie: GitHubInfo = {
-        id: userData.id,
-        login: userData.login,
-        name: userData.name,
-        email: userData.email,
-        avatar_url: userData.avatar_url,
-        html_url: userData.html_url
-        };
+        const userInfo = new URL ("/login", request.url);
 
-        response.cookies.set('github_user', JSON.stringify(userForCookie), {
-        httpOnly: true,  
-        maxAge: 60 * 60, 
-        path: '/',       
-        });
-        return response;
+        userInfo.searchParams.set("id", userData.id.toString());
+        userInfo.searchParams.set("login", userData.login);
+        if (userData.name) userInfo.searchParams.set("name", userData.name);
+        if (primaryEmail) userInfo.searchParams.set("email", primaryEmail);
+        userInfo.searchParams.set("avatar_url", userData.avatar_url);
+        if (userData.html_url) userInfo.searchParams.set("bio", userData.html_url);
+
+        return NextResponse.redirect(userInfo);
     } catch (error) {
-        console.error("OAUTG error", error);
-
+        console.error("OAuth error", error); 
         return NextResponse.redirect(new URL("/?error=oauth_error", request.url));
-    }
+    }    
 }
+
