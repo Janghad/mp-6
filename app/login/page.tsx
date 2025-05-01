@@ -1,5 +1,5 @@
 "use client";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {useEffect, useState} from "react";
