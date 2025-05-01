@@ -2,24 +2,26 @@ import { notFound } from "next/navigation"; //Learnt in CS391 S1
 import Link from "next/link";
 import Image from "next/image";
 
-type PageProps = { //needed for vercel to pass deployment
-    params: { [key: string]: string };
-    searchParams: { [key: string]: string | string[] | undefined };
-};
 
-export default function ProfilePage({ searchParams }: PageProps){
+export default function ProfilePage({
+    params,
+    searchParams,
+}: {
+    params: {};
+    searchParams: Record<string, string | string[] | undefined>;
+}) {
     if (!searchParams.login || !searchParams.avatar_url) {
-        notFound();
-    }
+    notFound();
+}
 
-    const userData = {
-        id: searchParams.id,
-        login: searchParams.login as string,
-        name: searchParams.name as string || "",
-        email: searchParams.email as string || "",
-        avatar_url: searchParams.avatar_url as string,
-        html_url: searchParams.bio as string || "",
-    };
+const userData = {
+    id: searchParams.id,
+    login: searchParams.login as string,
+    name: (searchParams.name as string) || "",
+    email: (searchParams.email as string) || "",
+    avatar_url: searchParams.avatar_url as string,
+    html_url: (searchParams.bio as string) || "",
+};
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-slate-100">
