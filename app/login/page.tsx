@@ -2,13 +2,14 @@ import { notFound } from "next/navigation"; //Learnt in CS391 S1
 import Link from "next/link";
 import Image from "next/image";
 
-export default async function ProfilePage({
-    searchParams, 
-}: {
-    searchParams: { [key: string]: string | string[] | undefined }
-}) {
+type PageProps = { //needed for vercel to pass deployment
+    params: { [key: string]: string };
+    searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export default function ProfilePage({ searchParams }: PageProps){
     if (!searchParams.login || !searchParams.avatar_url) {
-        notFound(); //faster way to return 404 page
+        notFound();
     }
 
     const userData = {
