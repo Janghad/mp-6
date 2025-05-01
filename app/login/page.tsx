@@ -2,12 +2,13 @@ import { notFound } from "next/navigation"; //Learnt in CS391 S1
 import Link from "next/link";
 import Image from "next/image";
 
+type SearchParamsType = { [key: string]: string | string[] | undefined };
 
 export default function ProfilePage({
     searchParams,
 }: {
     params: {};
-    searchParams: Record<string, string | string[] | undefined>;
+    searchParams: SearchParamsType;
 }) {
     if (!searchParams.login || !searchParams.avatar_url) {
     notFound();
