@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"; //Learnt in CS391 S1
 import Link from "next/link";
 import Image from "next/image";
 
-export default function ProfilePage({
+export default async function ProfilePage({
     searchParams, 
 }: {
     searchParams: { [key: string]: string | string[] | undefined }
@@ -47,4 +47,3 @@ export default function ProfilePage({
 }
 
 
-    
