@@ -1,27 +1,45 @@
-import { notFound } from "next/navigation"; //Learnt in CS391 S1
+"use client";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import {useEffect, useState} from "react";
 
-type SearchParamsType = { [key: string]: string | string[] | undefined };
+export default function ProfilePage() {
+    const [userData, setUserData] = useState({
+        id: "",
+        login: "",
+        name: "",
+        email: "",
+        avatar_url: "",
+        html_url: "",
+        });
 
-export default function ProfilePage({
-    searchParams,
-}: {
-    params: {};
-    searchParams: SearchParamsType;
-}) {
-    if (!searchParams.login || !searchParams.avatar_url) {
-    notFound();
-}
+    const [loading, setLoading] = useState(true);
 
-const userData = {
-    id: searchParams.id,
-    login: searchParams.login as string,
-    name: (searchParams.name as string) || "",
-    email: (searchParams.email as string) || "",
-    avatar_url: searchParams.avatar_url as string,
-    html_url: (searchParams.bio as string) || "",
-};
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        const login = url.searchParams.get("login");
+        const avatar_url = url.searchParams.get("avatar_url");
+
+        if(!login || !avatar_url) {
+            redirect("/");
+        }
+
+        setUserData({
+            id: url.searchParams.get("id") || "",
+            login: login,
+            name: url.searchParams.get("name") || "",
+            email: url.searchParams.get("email") || "",
+            avatar_url: avatar_url,
+            html_url: url.searchParams.get("bio") || "",
+        });
+
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return <div className="flex h-screen items-center justify-center">Loading...</div>;
+    }
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-slate-100">
@@ -48,5 +66,3 @@ const userData = {
         </main>
     );
 }
-
-
